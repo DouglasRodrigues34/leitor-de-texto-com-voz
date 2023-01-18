@@ -36,29 +36,37 @@ const setVoice = event => {
     utterance.voice = selectedVoice
 }
 
-const createExpressionBox = ({img, text}) => {
-    const div = document.createElement('div')
-    
-    div.classList.add('expression-box')
-    div.innerHTML = `
-        <img src="${img}" alt="${text}">
-        <p class="info">${text}</p>
-    `
-
-    div.addEventListener('click', () => {
-        setTextMessage(text)
-        speakText()
-
-        div.classList.add('active')
-        setTimeout(() => {
-            div.classList.remove('active')
-        }, 1000)
-    })
-
-    main.appendChild(div)
+const addExpressionBoxesIntoDOM = () => {
+    main.innerHTML = humanExpressions.map(({ img, text }) => `
+        <div class="expression-box" data-js="${text}">
+        <img src="${img}" alt="${text}" data-js="${text}">
+        <p class="info" data-js="${text}">${text}</p>
+        </div>
+    `).join('')
 }
 
-humanExpressions.forEach(createExpressionBox)
+addExpressionBoxesIntoDOM()
+
+const setStyleOfClickedDiv = dataValue => {
+    const div = document.querySelector(`[data-js="${dataValue}"]`)
+    div.classList.add('active')
+    setTimeout(() => {
+        div.classList.remove('active')
+    }, 1000)
+}
+
+main.addEventListener('click', event => {
+    const clickedElement = event.target
+    const clickedElementText = clickedElement.dataset.js
+    const clickedElementTextMustBeSpoken = ['img', 'p'].some(elementName => 
+        clickedElement.tagName.toLowerCase() === elementName.toLowerCase())
+
+    if (clickedElementTextMustBeSpoken) {
+        setTextMessage(clickedElementText)
+        speakText()
+        setStyleOfClickedDiv(clickedElementText)
+    }
+})
 
 let voices = []
 
