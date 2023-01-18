@@ -68,29 +68,40 @@ main.addEventListener('click', event => {
     }
 })
 
+const inserOptionElementsInDOM = voices => {
+    selectElement.innerHTML = voices.reduce((accumulator, {name, lang}) => {
+        accumulator += `<option value="${name}">${lang} | ${name}}</option>`
+        return accumulator
+    }, '')
+}
+
+const setUtteranceVoice = voice => {
+    utterance.voice = googleVoice
+        const voiceOptionElement = selectElement
+            .querySelector(`[value="${voice.name}"]`)
+        voiceOptionElement.selected = true
+}
+
+const setPTBRVoices = voices => {
+    const googleVoice = voices.find(voice =>
+        voice.name === 'Google português do Brasil')
+    const microsoftVoice = voices.find(voice =>
+        voice.name === 'Microsoft Maria Desktop - Português(Brazil)')
+    
+    if (googleVoice) {
+        setUtteranceVoice(googleVoice)
+    } else if (microsoftVoice) {
+        setUtteranceVoice(microsoftVoice)
+    }
+}
+
 let voices = []
 
 speechSynthesis.addEventListener('voiceschanged', () => {
-    voices = speechSynthesis.getVoices()
-    const googleVoice = voices.find(voice => voice.name === 'Google português do Brasil')
-    const microsoftVoice = voices.find(voice => voice.name === 'Microsoft Maria Desktop - Português(Brazil)')
+    voices = speechSynthesis.getVoices();
 
-    voices.forEach(({name, lang}) => {
-        const option = document.createElement('option')
-
-        option.value = name
-
-        if (googleVoice && option.value === googleVoice.name) {
-            utterance.voice = googleVoice
-            option.selected = true
-        } else if (microsoftVoice && option.value === microsoftVoice.name) {
-            utterance.voice = microsoftVoice
-            option.selected = true
-        }
-
-        option.textContent = `${lang} | ${name}`
-        selectElement.appendChild(option)
-    })
+    inserOptionElementsInDOM(voices)
+    setPTBRVoices(voices)
 })
 
 buttonInsertText.addEventListener('click', () => {
